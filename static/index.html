@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DetruAI — Deep Forensics Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/style.css">
+<script>
+  if(!sessionStorage.getItem('detruai_user')){
+    document.documentElement.style.visibility='hidden';
+    window.location.replace('/login');
+  }
+</script>
+<style>
+/* ── SIDEBAR DEV CREDIT ── */
+.dev-credit{
+  margin-top:12px;padding-top:12px;border-top:1px solid var(--border);
+  text-align:center;
+}
+.dev-by{font-size:0.64rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px}
+.dev-name{font-size:0.82rem;font-weight:600;color:var(--text2);margin-bottom:8px}
+.dev-links{display:flex;gap:6px;justify-content:center}
+.dev-link{
+  display:flex;align-items:center;gap:4px;color:var(--text3);text-decoration:none;
+  font-size:0.7rem;padding:4px 8px;border-radius:6px;border:1px solid var(--border2);
+  transition:all .15s ease;background:var(--bg3);
+}
+.dev-link:hover{color:var(--text);background:var(--bg4);border-color:rgba(255,255,255,0.15)}
+.dev-link-li:hover{color:#0a66c2!important}
+
+/* ── MODEL CHIP ── */
+.model-chip{
+  display:flex;align-items:center;gap:6px;padding:5px 10px;
+  background:var(--bg3);border:1px solid var(--border2);border-radius:8px;
+  font-size:0.75rem;color:var(--text3);
+}
+.model-chip svg{flex-shrink:0;color:var(--accent)}
+.model-chip select{
+  background:transparent;border:none;color:var(--text2);
+  font-family:var(--sans);font-size:0.78rem;outline:none;cursor:pointer;
+}
+.model-chip select option{background:var(--bg3);color:var(--text)}
+
+/* ── BOTTOM CREDIT BAR ── */
+.bottom-credit-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 20px;border-top:1px solid var(--border);
+  background:var(--bg2);flex-shrink:0;
+  font-size:0.74rem;color:var(--text3);
+}
+.bottom-credit-bar strong{color:var(--text2)}
+.bcb-links{display:flex;align-items:center;gap:10px}
+.bcb-dot{color:var(--text3)}
+.bcb-link{
+  display:flex;align-items:center;gap:5px;color:var(--text3);text-decoration:none;
+  transition:color .15s;padding:3px 7px;border-radius:5px;
+}
+.bcb-link:hover{color:var(--text);background:var(--hover-bg)}
+.bcb-link-li:hover{color:#0a66c2!important}
+
+/* ════════════════════════════════════════════
+   MOBILE RESPONSIVE — DetruAI v4.2
+   Breakpoints: 768px (tablet), 480px (phone)
+   ════════════════════════════════════════════ */
+
+/* ── TOPBAR MOBILE ── */
+@media(max-width:768px){
+  .topbar{padding:0 12px;gap:8px;height:54px}
+  .tb-breadcrumb{font-size:.78rem;flex:1}
+  .tb-clock{display:none}
+  .status-badge{display:none}
+  .model-chip{display:none}
+  .mobile-menu-btn{display:flex!important;width:36px;height:36px;border-radius:8px;border:1px solid var(--border2);background:var(--bg3);align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+  .mobile-menu-btn svg{width:16px;height:16px}
+}
+
+/* ── SIDEBAR MOBILE ── */
+@media(max-width:768px){
+  .sidebar{
+    position:fixed;left:-260px;top:0;bottom:0;z-index:900;width:240px;
+    transition:left .3s cubic-bezier(.22,1,.36,1);box-shadow:none;
+  }
+  .sidebar.mobile-open{left:0;box-shadow:8px 0 32px rgba(0,0,0,.6)}
+  .mobile-overlay{
+    position:fixed;inset:0;z-index:899;background:rgba(0,0,0,.6);
+    opacity:0;pointer-events:none;transition:opacity .3s;
+  }
+  .mobile-overlay.show{opacity:1;pointer-events:all}
+  .shell{grid-template-columns:1fr}
+  .content-area{padding-left:0}
+}
+
+/* ── MAIN CONTENT AREA ── */
+@media(max-width:768px){
+  .content{padding:12px}
+  .dash-scroll{gap:10px}
+}
+@media(max-width:480px){
+  .content{padding:8px}
+}
+
+/* ── STAT CARDS ── */
+@media(max-width:768px){
+  .dash-grid{grid-template-columns:repeat(3,1fr);gap:8px}
+  .stat-card{padding:12px 10px}
+  .stat-icon{width:28px;height:28px}
+  .stat-val{font-size:1.3rem}
+  .stat-sub{display:none}
+}
+@media(max-width:480px){
+  .dash-grid{grid-template-columns:repeat(2,1fr);gap:6px}
+  .stat-card:last-child{grid-column:1/-1}
+}
+
+/* ── MAIN ANALYSIS GRID (upload + result panels) ── */
+@media(max-width:768px){
+  .main-grid{
+    grid-template-columns:1fr!important;
+    grid-template-rows:auto auto;
+    gap:10px;
+  }
+  .upload-col,.result-col{width:100%}
+}
+
+/* ── DROP ZONE ── */
+@media(max-width:480px){
+  .drop-zone{padding:28px 12px}
+  .dz-icon{width:36px;height:36px}
+  .dz-title{font-size:.9rem}
+  .dz-sub{font-size:.72rem}
+  .dz-formats{flex-wrap:wrap;gap:4px;justify-content:center}
+}
+
+/* ── RESULT CARD ── */
+@media(max-width:768px){
+  .result-metrics-grid{grid-template-columns:repeat(2,1fr)!important}
+  .verdict-badge{padding:10px 14px}
+  .verdict-word{font-size:1.3rem}
+  .conf-num{font-size:1.5rem}
+}
+@media(max-width:480px){
+  .result-metrics-grid{grid-template-columns:1fr 1fr!important}
+  .heatmap-container{height:160px}
+}
+
+/* ── RECENT SCANS ── */
+@media(max-width:480px){
+  .scan-row{gap:8px;padding:8px 0}
+  .scan-name{font-size:.78rem}
+  .scan-role{font-size:.68rem}
+  .scan-avatar{width:28px;height:28px;font-size:.75rem}
+}
+
+/* ── LOG PANEL ── */
+@media(max-width:768px){
+  .log-panel{max-height:120px}
+  .log-entry .ts{display:none}
+}
+
+/* ── ANALYTICS TAB ── */
+@media(max-width:768px){
+  .analytics-grid{grid-template-columns:1fr!important}
+  .analytics-grid .chart-card{min-height:auto}
+}
+
+/* ── HISTORY TAB ── */
+@media(max-width:768px){
+  .history-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .history-table th:nth-child(n+6),
+  .history-table td:nth-child(n+6){display:none}
+  .hist-toolbar{flex-wrap:wrap;gap:8px}
+  .hist-search{width:100%}
+}
+@media(max-width:480px){
+  .history-table th:nth-child(n+4),
+  .history-table td:nth-child(n+4){display:none}
+}
+
+/* ── BATCH TAB ── */
+@media(max-width:768px){
+  .batch-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .batch-table th:nth-child(n+5),
+  .batch-table td:nth-child(n+5){display:none}
+  .batch-controls{flex-wrap:wrap;gap:8px}
+}
+
+/* ── IMAGE DIFF TAB ── */
+@media(max-width:768px){
+  .compare-grid{grid-template-columns:1fr!important;gap:10px}
+  .diff-result-row{flex-wrap:wrap;gap:10px}
+  .diff-stats-row{flex-wrap:wrap;gap:8px}
+}
+
+/* ── TEXT ANALYSIS ── */
+@media(max-width:768px){
+  .text-grid{grid-template-columns:1fr!important}
+  .text-metrics-grid{grid-template-columns:repeat(3,1fr)!important}
+}
+@media(max-width:480px){
+  .text-metrics-grid{grid-template-columns:repeat(2,1fr)!important}
+  .text-toolbar{flex-wrap:wrap;gap:6px}
+}
+
+/* ── AUDIO TAB ── */
+@media(max-width:768px){
+  .audio-grid{grid-template-columns:1fr!important}
+  .audio-upload-area{padding:28px 12px}
+}
+
+/* ── HEATMAP MODAL ── */
+@media(max-width:480px){
+  .hm-overlay img{max-width:95vw;max-height:80vh;border-radius:8px}
+}
+
+/* ── SYSTEM INFO TAB ── */
+@media(max-width:768px){
+  .about-grid{grid-template-columns:1fr!important}
+}
+@media(max-width:480px){
+  .info-row{flex-direction:column;gap:4px;align-items:flex-start}
+  .info-key{width:auto}
+}
+
+/* ── USER MENU ── */
+@media(max-width:480px){
+  .user-menu{right:8px;width:200px}
+  .user-pill .user-pill-info{display:none}
+}
+
+/* ── BOTTOM CREDIT BAR ── */
+@media(max-width:480px){
+  .bottom-credit-bar{flex-direction:column;gap:4px;padding:8px 12px;text-align:center}
+  .bcb-links{flex-wrap:wrap;justify-content:center}
+}
+
+/* ── GUEST / PROFILE MODALS ── */
+@media(max-width:480px){
+  .guest-modal{padding:24px 18px;border-radius:14px}
+  .gm-features{padding:10px 12px}
+  .gm-cta,.gm-skip{font-size:.85rem}
+}
+
+/* ── GENERAL TOUCH IMPROVEMENTS ── */
+@media(max-width:768px){
+  .nav-item{min-height:44px}
+  .tb-btn{min-width:36px;min-height:36px}
+  button,select,input[type="text"],input[type="email"],input[type="password"]{
+    min-height:40px;
+  }
+  input[type="file"]{min-height:auto}
+}
+
+/* ── LIGHT MODE MOBILE OVERRIDES ── */
+[data-theme="light"] @media(max-width:768px){
+  .sidebar.mobile-open{box-shadow:8px 0 32px rgba(0,0,0,.2)}
+}
+</style>
+</head>
+<body>
+
+<!-- Aurora animated background -->
+<div class="aurora-bg"></div>
+
+<!-- Heatmap modal -->
+<div class="hm-overlay" id="hmOverlay" onclick="if(event.target===this)closeHM()">
+  <button class="hm-close" onclick="closeHM()">✕</button>
+  <img id="hmModalImg" src="" alt="Heatmap">
+</div>
+
+<div class="shell">
+
+  <!-- ── SIDEBAR ── -->
+  <nav class="sidebar">
+    <div class="logo">
+      <div class="logo-mark">
+  <img src="/static/Logo.png" style="width:40px;height:40px;object-fit:contain">
+</div>
+      <div class="logo-text">
+        <div class="logo-name">DetruAI</div>
+        <div class="logo-ver">FORENSICS v4.2</div>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Pages</div>
+      <div class="nav-item active" id="nav-image" onclick="showTab('image',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        <span class="label">Dashboard</span>
+        <span class="badge" id="imageCountBadge">0</span>
+      </div>
+      <div class="nav-item" id="nav-text" onclick="showTab('text',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8"/></svg>
+        <span class="label">Text Analysis</span>
+      </div>
+      <div class="nav-item" id="nav-audio" onclick="showTab('audio',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"/></svg>
+        <span class="label">Audio Detection</span>
+      </div>
+      <div class="nav-item" id="nav-forensic" onclick="showTab('forensic',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <span class="label">Analytics</span>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Tools</div>
+      <div class="nav-item" id="nav-compare" onclick="showTab('compare',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+        <span class="label">Image Diff</span>
+      </div>
+      <div class="nav-item" id="nav-batch" onclick="showTab('batch',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 12H2M22 6H2M22 18H2"/></svg>
+        <span class="label">Batch Upload</span>
+        <span class="badge" id="batchCountBadge" style="display:none">0</span>
+      </div>
+      <div class="nav-item" id="nav-history" onclick="showTab('history',document.getElementById('nav-history'));setTimeout(renderHistory,50)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2a10 10 0 100 20A10 10 0 0012 2z"/><path d="M12 6v6l4 2"/></svg>
+        <span class="label">Scan History</span>
+        <span class="badge" id="historyBadge">0</span>
+      </div>
+      <div class="nav-item" id="nav-about" onclick="showTab('about',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        <span class="label">System Info</span>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="sys-pill">
+        <div class="sys-dot"></div>
+        <div class="sys-info">
+          <div class="sys-name" id="smpModelName">DETRUAI ENGINE</div>
+          <div class="sys-sub" id="smpModelSub">ViT + CLIP + MTCNN</div>
+        </div>
+      </div>
+      <div class="dev-credit">
+        <div class="dev-by">Developed by</div>
+        <div class="dev-name">Mohammad Hamza</div>
+        <div class="dev-links">
+          <a href="https://github.com/MHamza-9111" target="_blank" rel="noopener" class="dev-link" title="GitHub">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+            GitHub
+          </a>
+          <a href="https://www.linkedin.com/in/mhamza9111/" target="_blank" rel="noopener" class="dev-link dev-link-li" title="LinkedIn">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            LinkedIn
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── MAIN ── -->
+  <div class="main">
+    <!-- Mobile sidebar overlay -->
+    <div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileSidebar()"></div>
+
+    <header class="topbar">
+      <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileSidebar()" aria-label="Menu" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="tb-breadcrumb" id="tabBreadcrumb">Dashboard</div>
+      <div class="tb-actions">
+        <div class="status-badge"><div class="dot"></div><span id="modelsActiveLabel">3 Models Active</span></div>
+        <div class="tb-clock" id="clockDisplay">--:--:--</div>
+        <button class="tb-btn" id="muteBtn" title="Toggle sound">🔊</button>
+        <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle theme"></button>
+        <!-- Model selector — now functional -->
+        <div class="model-chip">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          <select id="globalModelSelect" onchange="updateModelDisplay()" title="Switch detection model">
+            <option value="vit+clip+mtcnn">Full Pipeline</option>
+            <option value="vit">ViT Fast</option>
+            <option value="clip">CLIP Only</option>
+            <option value="vit+mtcnn">ViT+Faces</option>
+          </select>
+        </div>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- ══ DASHBOARD TAB ══ -->
+      <div class="tab-panel active" id="tab-image">
+
+        <div class="dash-scroll">
+          <!-- Stat cards row — 5 columns for 5 stats -->
+          <div class="dash-grid">
+            <div class="stat-card">
+              <div class="stat-icon si-orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+              <div class="stat-info">
+                <div class="stat-label">Total Scans</div>
+                <div class="stat-val" id="m-total">0</div>
+                <div class="stat-sub">This session</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon si-red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg></div>
+              <div class="stat-info">
+                <div class="stat-label">Fakes Detected</div>
+                <div class="stat-val" id="m-fakes">0</div>
+                <div class="stat-sub">AI-generated</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon si-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 6L9 17l-5-5"/></svg></div>
+              <div class="stat-info">
+                <div class="stat-label">Real Media</div>
+                <div class="stat-val" id="m-real">0</div>
+                <div class="stat-sub">Authentic</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon si-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+              <div class="stat-info">
+                <div class="stat-label">Fake Rate</div>
+                <div class="stat-val" id="m-rate">0%</div>
+                <div class="stat-sub">This session</div>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon si-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div>
+              <div class="stat-info">
+                <div class="stat-label">Videos</div>
+                <div class="stat-val" id="m-videos">0</div>
+                <div class="stat-sub">Temporal scans</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main content area -->
+          <div class="dash-main">
+            <!-- Upload + workspace card -->
+            <div class="chart-card">
+              <div class="card-hdr">
+                <div class="card-hdr-left">
+                  <div>
+                    <div class="card-hdr-title">Detection Workspace</div>
+                    <div class="card-hdr-sub">Upload image or video to analyze</div>
+                  </div>
+                </div>
+                <button class="period-btn" id="ytdBtn">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  Session
+                </button>
+              </div>
+              <div class="card-body" style="display:flex;flex-direction:column;gap:10px;height:calc(100% - 65px);overflow:hidden;min-height:0">
+                <!-- Drop zone -->
+                <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+                  <div class="dz-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  </div>
+                  <div class="dz-title">Drop file here</div>
+                  <div class="dz-sub">or click to browse · <span style="color:var(--accent);font-size:0.75rem">Ctrl+V to paste</span></div>
+                  <div class="fmt-row">
+                    <span class="fmt-tag">JPG</span><span class="fmt-tag">PNG</span><span class="fmt-tag">WEBP</span>
+                    <span class="fmt-tag">MP4</span><span class="fmt-tag">MOV</span><span class="fmt-tag">AVI</span>
+                  </div>
+                </div>
+                <input type="file" id="fileInput" accept="image/*,video/*" style="display:none">
+
+                <!-- Preview -->
+                <div class="preview-wrap" id="previewWrap">
+                  <div class="preview-box" id="previewBox">
+                    <div class="scan-overlay" id="scanOverlay">
+                      <div class="scan-line"></div>
+                      <div class="corner tl"></div><div class="corner tr"></div>
+                      <div class="corner bl"></div><div class="corner br"></div>
+                    </div>
+                  </div>
+                  <div class="preview-meta">
+                    <span class="preview-fname" id="previewFname"></span>
+                    <button class="clear-btn" onclick="clearFile()">Clear</button>
+                  </div>
+                </div>
+
+                <!-- Progress -->
+                <div class="prog-wrap" id="progWrap">
+                  <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+                  <div class="prog-label" id="progLabel">Analyzing…</div>
+                </div>
+
+                <!-- Analyze button -->
+                <button class="analyze-btn" id="analyzeBtn" disabled onclick="runAnalysis()">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                  Analyze Media
+                </button>
+              </div>
+            </div>
+
+            <!-- Right side: results + heatmap -->
+            <div class="side-panels">
+              <!-- Results card -->
+              <div class="chart-card" style="flex:0 0 auto">
+                <div class="card-hdr">
+                  <div class="card-hdr-left">
+                    <div>
+                      <div class="card-hdr-title">Analysis Result</div>
+                    </div>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:6px">
+                    <div class="pane-dot" id="resultDot" style="background:var(--text3)"></div>
+                    <span style="font-size:10px;font-family:var(--mono);color:var(--text3)" id="resultPaneTitle">Awaiting</span>
+                    <span style="font-size:9px;font-family:var(--mono);padding:2px 8px;border-radius:10px;background:var(--bg4);color:var(--text3)" id="resultPaneStatus">—</span>
+                  </div>
+                </div>
+                <div class="card-body" style="overflow-y:auto">
+                  <!-- Empty -->
+                  <div class="empty-state" id="emptyPlaceholder">
+                    <div class="es-ring"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></div>
+                    <div class="es-text">Upload a file<br>to begin analysis</div>
+                  </div>
+                  <!-- Result card -->
+                  <div class="result-card" id="resultCard">
+                    <div class="result-hdr">
+                      <div class="result-dot" id="resultDotInner" style="background:var(--text3)"></div>
+                      <span id="resultPaneTitleInner">DETECTION OUTPUT</span>
+                      <span style="margin-left:auto;font-size:9px" id="resultPaneStatusInner">—</span>
+                    </div>
+                    <div class="result-body">
+                      <div class="verdict-row">
+                        <div class="verdict-badge" id="verdictBadge">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" id="verdictIcon"><circle cx="12" cy="12" r="9"/></svg>
+                          <div class="verdict-word" id="verdictWord">—</div>
+                        </div>
+                        <div class="verdict-right">
+                          <div class="conf-label">DETECTION CONFIDENCE</div>
+                          <div class="conf-bar"><div class="conf-bar-fill" id="confFill"></div></div>
+                          <div class="conf-num" id="confNum" style="color:var(--text3)">—</div>
+                          <div class="verdict-fname" id="verdictFilename">—</div>
+                        </div>
+                      </div>
+                      <div class="verdict-desc" id="verdictDesc"></div>
+                      <div class="rm-metrics">
+                        <div class="rm-box"><div class="rm-label">FAKE %</div><div class="rm-val" id="rm-fake">—</div></div>
+                        <div class="rm-box"><div class="rm-label">REAL %</div><div class="rm-val" id="rm-real">—</div></div>
+                        <div class="rm-box"><div class="rm-label">FACES</div><div class="rm-val" id="rm-faces">—</div></div>
+                        <div class="rm-box"><div class="rm-label">FRAMES</div><div class="rm-val" id="rm-frames">—</div></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Heatmap card — larger, proper size -->
+              <div class="mini-card" id="heatmapCard" style="flex:1;min-height:220px">
+                <div class="mini-card-hdr">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+                  GRADCAM ATTENTION HEATMAP
+                </div>
+                <div class="hm-wrap">
+                  <div class="hm-img" id="heatmapImg" onclick="openHM()">
+                    <img id="heatmapImgEl" src="" alt="Heatmap" style="display:none">
+                    <span class="hm-img-placeholder" id="heatmapPlaceholder">Awaiting analysis…</span>
+                  </div>
+                  <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+                    <div class="hm-scale"></div>
+                    <div class="hm-legend"><span>High</span><span>Low</span></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Timeline -->
+              <div class="timeline-section" id="timelineSection">
+                <div class="tl-hdr">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                  FRAME TIMELINE
+                </div>
+                <div class="tl-body"><div class="tl-chart" id="timelineChart"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom: recent scans FULL WIDTH (quick actions removed) -->
+          <div class="dash-bottom-single" style="margin-bottom:16px">
+            <div class="chart-card">
+              <div class="card-hdr">
+                <div class="card-hdr-title">Recent Scans</div>
+                <button class="add-btn" onclick="document.getElementById('fileInput').click()" title="New scan">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </button>
+              </div>
+              <div class="card-body">
+                <div class="scan-list" id="recentScansList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:0">
+                  <div style="font-size:11px;font-family:var(--mono);color:var(--text3);text-align:center;padding:24px 0;opacity:.5;grid-column:1/-1">No scans yet</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- /dash-scroll -->
+
+        <!-- Log -->
+        <div class="log-pane">
+          <div class="log-hdr">
+            <div style="width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2.5s infinite"></div>
+            <span class="log-hdr-title">SYSTEM LOG</span>
+            <span style="margin-left:auto;font-size:9px;font-family:var(--mono);color:var(--text3);cursor:pointer" onclick="clearLog()">CLEAR</span>
+          </div>
+          <div class="log-list" id="logList"></div>
+        </div>
+      </div>
+
+      <!-- ══ TEXT TAB ══ -->
+      <div class="tab-panel" id="tab-text">
+        <div class="page-hdr">
+          <div>
+            <div class="page-title">Text Analysis</div>
+            <div class="page-sub">// Multi-signal AI text detection — Heuristic + Statistical + Linguistic</div>
+          </div>
+          <div class="page-hdr-btns">
+            <button class="action-btn" onclick="loadSampleText('ai')">Load AI Sample</button>
+            <button class="action-btn" onclick="loadSampleText('human')">Load Human Sample</button>
+            <button class="action-btn danger" onclick="clearTextAnalysis()">Clear</button>
+          </div>
+        </div>
+        <div class="text-layout">
+          <div class="text-pane text-pane-l">
+            <div class="text-pane-hdr">
+              <span class="text-pane-title">INPUT TEXT</span>
+              <span id="charCount" style="font-size:9px;font-family:var(--mono);color:var(--text3)">0 chars</span>
+            </div>
+            <div class="text-body">
+              <div class="text-input-wrap">
+                <textarea id="textInput" placeholder="Paste text to analyze for AI authorship..." oninput="updateCharCount()"></textarea>
+              </div>
+              <div class="text-footer">
+                <span style="font-size:10px;color:var(--text3);font-family:var(--mono)">Min. 50 chars required</span>
+                <button class="text-analyze-btn" onclick="analyzeText()">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                  Analyze Text
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="text-pane">
+            <div class="text-pane-hdr">
+              <span class="text-pane-title">ANALYSIS RESULTS</span>
+              <span id="textResultStatus" style="font-size:9px;font-family:var(--mono);color:var(--text3);padding:3px 8px;background:var(--bg4);border-radius:4px">AWAITING</span>
+            </div>
+            <div class="text-results-scroll" id="textResultsScroll">
+              <div class="text-result-waiting" id="textWaiting">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+                <span style="font-size:11px;font-family:var(--mono);text-align:center;line-height:1.8">Enter text and click Analyze<br>to detect AI authorship</span>
+              </div>
+              <div class="text-verdict-card" id="textVerdictCard">
+                <div class="tv-top">
+                  <div class="tv-badge" id="tvBadge">
+                    <svg class="tv-badge-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" id="tvIcon"><circle cx="12" cy="12" r="9"/></svg>
+                    <span class="tv-badge-word" id="tvWord">—</span>
+                  </div>
+                  <div class="tv-right">
+                    <div class="tv-conf-label">AI PROBABILITY</div>
+                    <div class="tv-bar"><div class="tv-bar-fill" id="tvBarFill"></div></div>
+                    <div class="tv-num" id="tvNum" style="color:var(--text3)">—</div>
+                  </div>
+                </div>
+                <div class="text-metrics-grid" id="textMetricsGrid">
+                  <div class="tm-box"><div class="tm-label">AI PROBABILITY</div><div class="tm-val" id="trAIProb">—</div><div class="tm-sub">likelihood of AI</div></div>
+                  <div class="tm-box"><div class="tm-label">HUMAN PROBABILITY</div><div class="tm-val" id="trHumanProb">—</div><div class="tm-sub">likelihood of human</div></div>
+                  <div class="tm-box"><div class="tm-label">PERPLEXITY</div><div class="tm-val" id="trPerplexity">—</div><div class="tm-sub">predictability</div></div>
+                  <div class="tm-box"><div class="tm-label">BURSTINESS</div><div class="tm-val" id="trBurstiness">—</div><div class="tm-sub">sentence variation</div></div>
+                  <div class="tm-box"><div class="tm-label">FORMAL DENSITY</div><div class="tm-val" id="trFormal">—</div><div class="tm-sub">formal word ratio</div></div>
+                  <div class="tm-box"><div class="tm-label">PERSONAL VOICE</div><div class="tm-val" id="trPersonal">—</div><div class="tm-sub">first-person ratio</div></div>
+                </div>
+              </div>
+              <div class="text-reasons" id="textReasons">
+                <div class="tr-hdr">SIGNAL INDICATORS</div>
+                <div id="reasonList"></div>
+              </div>
+              <div style="display:none" id="highlightWrap">
+                <div style="font-size:9px;font-family:var(--mono);color:var(--text3);letter-spacing:1.5px;margin-bottom:6px">HIGHLIGHTED INDICATORS</div>
+                <div class="highlight-area" id="highlightArea"></div>
+                <div class="text-legend" id="textLegend">
+                  <div class="legend-dot" style="background:rgba(239,68,68,.6)"></div><span>AI indicator words</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ AUDIO TAB — REDESIGNED ══ -->
+      <div class="tab-panel" id="tab-audio">
+        <div class="page-hdr">
+          <div><div class="page-title">Audio Detection</div><div class="page-sub">// Voice synthesis &amp; clone detection</div></div>
+        </div>
+        <div class="audio-layout">
+          <!-- Hero upload + waveform + results -->
+          <div class="audio-hero">
+            <div class="audio-upload-zone" onclick="document.getElementById('audioInput').click()" id="audioUploadZone">
+              <div class="audio-mic-ring">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/></svg>
+              </div>
+              <div class="audio-upload-title">Drop audio file here</div>
+              <div class="audio-upload-sub">or click to browse</div>
+              <div class="audio-fmt-tags">
+                <span class="fmt-tag">MP3</span><span class="fmt-tag">WAV</span><span class="fmt-tag">M4A</span><span class="fmt-tag">FLAC</span>
+              </div>
+              <input type="file" id="audioInput" accept="audio/*" style="display:none" onchange="handleAudio(this)">
+            </div>
+
+            <!-- Waveform / spectrum -->
+            <div class="audio-waveform-area" id="audioWaveformArea">
+              <div class="audio-waveform-label">WAVEFORM ANALYSIS</div>
+              <div class="audio-spectrum" id="audioSpectrum"></div>
+            </div>
+
+            <!-- Results grid -->
+            <div class="audio-result-grid" id="audioResultGrid">
+              <div class="audio-grid-card">
+                <div class="audio-grid-label">AI PROBABILITY</div>
+                <div class="audio-grid-val" id="arAI">—</div>
+                <div class="audio-grid-bar-bg"><div class="audio-grid-bar-fill" id="arAIBar" style="width:0%;background:linear-gradient(90deg,var(--red),#ff6b8a)"></div></div>
+              </div>
+              <div class="audio-grid-card">
+                <div class="audio-grid-label">CLONE SCORE</div>
+                <div class="audio-grid-val" id="arClone">—</div>
+                <div class="audio-grid-bar-bg"><div class="audio-grid-bar-fill" id="arCloneBar" style="width:0%;background:linear-gradient(90deg,var(--amber),#fbbf24)"></div></div>
+              </div>
+              <div class="audio-grid-card">
+                <div class="audio-grid-label">NATURALNESS</div>
+                <div class="audio-grid-val" id="arNat">—</div>
+                <div class="audio-grid-bar-bg"><div class="audio-grid-bar-fill" id="arNatBar" style="width:0%;background:linear-gradient(90deg,var(--blue),var(--cyan))"></div></div>
+              </div>
+              <div class="audio-grid-card" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px">
+                <div class="audio-grid-label">VERDICT</div>
+                <div id="arVerdict" style="display:flex;align-items:center;justify-content:center;min-height:32px">—</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Feature breakdown cards -->
+          <div class="audio-features" id="audioFeatures" style="display:none">
+            <div class="audio-feature-card">
+              <div class="audio-feature-title">SPECTRAL COHERENCE</div>
+              <div class="audio-feature-bar-bg"><div class="audio-feature-bar-fill" id="specCoherenceBar" style="width:0%;background:linear-gradient(90deg,var(--accent),var(--amber))"></div></div>
+              <div class="audio-feature-stat">
+                <div class="audio-feature-num" id="specCoherenceVal">—</div>
+                <div class="audio-feature-sub">Frequency consistency</div>
+              </div>
+            </div>
+            <div class="audio-feature-card">
+              <div class="audio-feature-title">PROSODY VARIANCE</div>
+              <div class="audio-feature-bar-bg"><div class="audio-feature-bar-fill" id="prosodyBar" style="width:0%;background:linear-gradient(90deg,var(--blue),var(--cyan))"></div></div>
+              <div class="audio-feature-stat">
+                <div class="audio-feature-num" id="prosodyVal">—</div>
+                <div class="audio-feature-sub">Pitch naturalness</div>
+              </div>
+            </div>
+            <div class="audio-feature-card">
+              <div class="audio-feature-title">BREATH PATTERN</div>
+              <div class="audio-feature-bar-bg"><div class="audio-feature-bar-fill" id="breathBar" style="width:0%;background:linear-gradient(90deg,var(--green),#34d399)"></div></div>
+              <div class="audio-feature-stat">
+                <div class="audio-feature-num" id="breathVal">—</div>
+                <div class="audio-feature-sub">Human breathing cues</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ ANALYTICS TAB ══ -->
+      <div class="tab-panel" id="tab-forensic">
+        <div class="page-hdr">
+          <div><div class="page-title">Analytics &amp; Charts</div><div class="page-sub">// Session statistics, detection trends and probability breakdown</div></div>
+          <div class="page-hdr-btns">
+            <button class="action-btn" onclick="refreshCharts()">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+              Refresh
+            </button>
+          </div>
+        </div>
+        <div class="analytics-layout">
+          <div class="chart-row">
+            <div class="chart-card-inner" style="flex:1;min-width:220px">
+              <div class="chart-card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 010 20"/></svg>
+                VERDICT DISTRIBUTION
+              </div>
+              <div class="chart-body" style="display:flex;align-items:center;justify-content:center;gap:24px">
+                <canvas id="donutCanvas" width="130" height="130" style="flex-shrink:0"></canvas>
+                <div class="donut-legend">
+                  <div class="dl-item"><div class="dl-dot" style="background:var(--red)"></div><span class="dl-label">FAKE</span><span class="dl-val" id="dl-fake">0</span></div>
+                  <div class="dl-item"><div class="dl-dot" style="background:var(--green)"></div><span class="dl-label">REAL</span><span class="dl-val" id="dl-real">0</span></div>
+                  <div class="dl-item"><div class="dl-dot" style="background:var(--amber)"></div><span class="dl-label">UNCERTAIN</span><span class="dl-val" id="dl-uncertain">0</span></div>
+                  <div class="dl-item" style="margin-top:6px;border-top:1px solid var(--border);padding-top:6px"><div class="dl-dot" style="background:var(--text3)"></div><span class="dl-label">TOTAL</span><span class="dl-val" id="dl-total">0</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="chart-card-inner" style="flex:1;min-width:220px">
+              <div class="chart-card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                MEDIA TYPE BREAKDOWN
+              </div>
+              <div class="chart-body">
+                <div style="margin-bottom:14px">
+                  <div style="display:flex;justify-content:space-between;font-size:10px;font-family:var(--mono);color:var(--text3);margin-bottom:5px"><span>IMAGES</span><span id="bar-images-val">0</span></div>
+                  <div style="height:8px;background:var(--bg4);border-radius:5px;overflow:hidden"><div id="bar-images" style="height:100%;width:0%;background:linear-gradient(90deg,var(--blue),var(--cyan));border-radius:5px;transition:width .8s ease;box-shadow:0 0 6px rgba(59,130,246,0.4)"></div></div>
+                </div>
+                <div style="margin-bottom:14px">
+                  <div style="display:flex;justify-content:space-between;font-size:10px;font-family:var(--mono);color:var(--text3);margin-bottom:5px"><span>VIDEOS</span><span id="bar-videos-val">0</span></div>
+                  <div style="height:8px;background:var(--bg4);border-radius:5px;overflow:hidden"><div id="bar-videos" style="height:100%;width:0%;background:linear-gradient(90deg,var(--purple),#a78bfa);border-radius:5px;transition:width .8s ease;box-shadow:0 0 6px rgba(139,92,246,0.4)"></div></div>
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:10px;font-family:var(--mono);color:var(--text3);margin-bottom:5px"><span>FAKE RATE</span><span id="bar-fakerate-val">0%</span></div>
+                  <div style="height:8px;background:var(--bg4);border-radius:5px;overflow:hidden"><div id="bar-fakerate" style="height:100%;width:0%;background:linear-gradient(90deg,var(--red),#ff6b8a);border-radius:5px;transition:width .8s ease;box-shadow:0 0 6px rgba(239,68,68,0.4)"></div></div>
+                </div>
+              </div>
+            </div>
+            <div class="chart-card-inner" style="flex:1;min-width:220px">
+              <div class="chart-card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 100 20"/><path d="M12 2a10 10 0 0110 10"/></svg>
+                AVG CONFIDENCE GAUGE
+              </div>
+              <div class="chart-body" style="display:flex;flex-direction:column;align-items:center;gap:6px">
+                <canvas id="gaugeCanvas" width="160" height="90" style="flex-shrink:0"></canvas>
+                <div style="font-size:20px;font-weight:700;font-family:var(--mono);color:var(--text)" id="gaugeVal">—</div>
+                <div style="font-size:9px;font-family:var(--mono);color:var(--text3)">AVG CONFIDENCE</div>
+              </div>
+            </div>
+          </div>
+          <div class="chart-row">
+            <div class="chart-card-inner" style="flex:2;min-width:300px">
+              <div class="chart-card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                DETECTION TIMELINE
+              </div>
+              <div class="chart-body" style="position:relative;min-height:120px">
+                <canvas id="timelineMainCanvas" style="width:100%"></canvas>
+                <div class="timeline-empty" id="timelineEmpty">No scan data yet</div>
+              </div>
+            </div>
+            <div class="chart-card-inner" style="flex:1;min-width:220px">
+              <div class="chart-card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2"/></svg>
+                MODEL USAGE
+              </div>
+              <div class="chart-body" id="modelUsageChart"><div style="font-size:10px;font-family:var(--mono);color:var(--text3);text-align:center;padding:16px 0">No data yet</div></div>
+            </div>
+          </div>
+          <div class="chart-row">
+            <div class="chart-card-inner" style="flex:1;min-width:300px">
+              <div class="chart-card-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="7.5" cy="7.5" r="2.5"/><circle cx="16.5" cy="7.5" r="2.5"/><circle cx="12" cy="16" r="2.5"/></svg>
+                FAKE/REAL SCATTER — <span id="scatterCount" style="text-transform:none">0 scans plotted</span>
+              </div>
+              <div class="chart-body" style="position:relative;min-height:130px">
+                <canvas id="scatterCanvas" style="width:100%"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ COMPARE TAB ══ -->
+      <div class="tab-scroll" id="tab-compare">
+        <div class="page-hdr">
+          <div><div class="page-title">Image Diff Tool</div><div class="page-sub">// Pixel-level forensic comparison</div></div>
+          <div class="page-hdr-btns">
+            <button class="action-btn" id="diffRunBtn" disabled onclick="runPixelDiff()">Run Pixel Diff</button>
+            <button class="action-btn danger" onclick="clearCompare()">Clear</button>
+          </div>
+        </div>
+        <div class="compare-layout">
+          <div class="cmp-top">
+            <div class="cmp-pane">
+              <div class="cmp-label">IMAGE A — ORIGINAL / REFERENCE</div>
+              <div class="cmp-box" id="compareBoxA" onclick="document.getElementById('compareInputA').click()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <div class="cmp-placeholder">Click to upload original</div>
+              </div>
+              <input type="file" id="compareInputA" accept="image/*" style="display:none" onchange="loadDiffImage('A',this)">
+            </div>
+            <div class="cmp-pane">
+              <div class="cmp-label">IMAGE B — SUSPECT / EDITED</div>
+              <div class="cmp-box" id="compareBoxB" onclick="document.getElementById('compareInputB').click()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <div class="cmp-placeholder">Click to upload modified</div>
+              </div>
+              <input type="file" id="compareInputB" accept="image/*" style="display:none" onchange="loadDiffImage('B',this)">
+            </div>
+          </div>
+          <div class="diff-panel" id="diffResultPanel">
+            <div class="diff-title">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+              PIXEL-LEVEL CHANGE DETECTION RESULTS
+            </div>
+            <div class="diff-stats" id="diffStatsRow"></div>
+            <div class="diff-canvases">
+              <div>
+                <div class="diff-canvas-label">CHANGE MAP</div>
+                <div class="diff-canvas-wrap"><canvas id="diffCanvas"></canvas></div>
+              </div>
+              <div>
+                <div class="diff-canvas-label">HIGHLIGHTED DIFF</div>
+                <div class="diff-canvas-wrap"><canvas id="diffHighlightCanvas"></canvas></div>
+              </div>
+            </div>
+            <div class="diff-legend">
+              <span><span class="diff-ldot" style="background:var(--red)"></span>High change</span>
+              <span><span class="diff-ldot" style="background:var(--amber)"></span>Medium change</span>
+              <span><span class="diff-ldot" style="background:var(--cyan)"></span>Minor change</span>
+              <span><span class="diff-ldot" style="background:var(--bg5);border:1px solid var(--border);display:inline-block"></span>No change</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ BATCH TAB ══ -->
+      <div class="tab-scroll" id="tab-batch">
+        <div class="page-hdr">
+          <div><div class="page-title">Batch Upload</div><div class="page-sub">// Scan multiple files at once</div></div>
+          <div class="page-hdr-btns">
+            <button class="action-btn danger" onclick="clearBatch()">Clear All</button>
+            <button class="action-btn primary" onclick="runBatchAnalysis()">Run Batch Scan</button>
+          </div>
+        </div>
+        <div class="batch-layout">
+          <div class="batch-drop" id="batchDrop" onclick="document.getElementById('batchInput').click()">
+            <div class="dz-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+            <div>
+              <div class="dz-title">Drop up to 100 files here</div>
+              <div class="dz-sub">Images and videos — heatmaps generated per file</div>
+            </div>
+            <input type="file" id="batchInput" accept="image/*,video/*" multiple style="display:none" onchange="handleBatchFiles(this)">
+          </div>
+          <table class="batch-table">
+            <thead><tr><th>#</th><th>Filename</th><th>Type</th><th>Size</th><th>Status</th><th>Verdict</th><th>Confidence</th><th>Heatmap</th></tr></thead>
+            <tbody id="batchTableBody"><tr><td colspan="8" class="bt-empty">No files added yet.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══ HISTORY TAB ══ -->
+      <div class="tab-scroll" id="tab-history">
+        <div class="page-hdr">
+          <div><div class="page-title">Scan History</div><div class="page-sub">// All scans this session</div></div>
+          <div class="page-hdr-btns">
+            <div class="tb-search" style="width:200px">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+              <input type="text" id="historySearch" placeholder="Search history..." oninput="filterHistory()">
+            </div>
+            <button class="action-btn" onclick="exportHistory()">Export CSV</button>
+            <button class="action-btn danger" onclick="clearHistory()">Clear History</button>
+          </div>
+        </div>
+        <div style="padding:16px;overflow-y:auto;flex:1">
+          <table class="hist-table">
+            <thead><tr><th>File</th><th>Verdict</th><th>Confidence</th><th>Fake %</th><th>Type</th><th>Faces</th><th>Model</th><th>Time</th></tr></thead>
+            <tbody id="historyBody"><tr><td colspan="8" class="hist-empty">No scans yet. Upload a file to begin.</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ══ ABOUT TAB ══ -->
+      <div class="tab-scroll" id="tab-about">
+        <div class="page-hdr">
+          <div><div class="page-title">System Information</div><div class="page-sub">// Model architecture, pipeline and session stats</div></div>
+        </div>
+        <div class="about-grid">
+          <div class="info-card">
+            <div class="info-card-title">DETECTION MODEL</div>
+            <div class="info-row"><span class="info-key">Architecture</span><span class="info-val">ViT-Base Patch-16</span></div>
+            <div class="info-row"><span class="info-key">Parameters</span><span class="info-val">86 Million</span></div>
+            <div class="info-row"><span class="info-key">Training Data</span><span class="info-val">52k images</span></div>
+            <div class="info-row"><span class="info-key">Test Accuracy</span><span class="info-val" style="color:var(--green)">91.6%</span></div>
+            <div class="info-row"><span class="info-key">Macro F1</span><span class="info-val">0.914</span></div>
+            <div class="info-row"><span class="info-key">Source</span><span class="info-val">HuggingFace</span></div>
+          </div>
+          <div class="info-card">
+            <div class="info-card-title">SUPPORTED GENERATORS</div>
+            <div class="info-row"><span class="info-key">Midjourney</span><span class="info-val" style="color:var(--accent)">✓ Detected</span></div>
+            <div class="info-row"><span class="info-key">DALL-E 3</span><span class="info-val" style="color:var(--cyan)">✓ Detected</span></div>
+            <div class="info-row"><span class="info-key">Stable Diffusion</span><span class="info-val" style="color:var(--green)">✓ Detected</span></div>
+            <div class="info-row"><span class="info-key">Adobe Firefly</span><span class="info-val" style="color:var(--accent)">✓ Detected</span></div>
+            <div class="info-row"><span class="info-key">Ideogram</span><span class="info-val" style="color:var(--amber)">⚡ Partial</span></div>
+            <div class="info-row"><span class="info-key">Runway Gen-3</span><span class="info-val" style="color:var(--green)">✓ Detected</span></div>
+          </div>
+          <div class="info-card">
+            <div class="info-card-title">SESSION STATISTICS</div>
+            <div class="info-row"><span class="info-key">Total Scans</span><span class="info-val" id="ab-total">0</span></div>
+            <div class="info-row"><span class="info-key">Images Analyzed</span><span class="info-val" id="ab-images">0</span></div>
+            <div class="info-row"><span class="info-key">Videos Analyzed</span><span class="info-val" id="ab-videos">0</span></div>
+            <div class="info-row"><span class="info-key">Fakes Detected</span><span class="info-val" id="ab-fakes">0</span></div>
+            <div class="info-row"><span class="info-key">Session Started</span><span class="info-val" id="ab-started">—</span></div>
+          </div>
+          <div class="info-card">
+            <div class="info-card-title">PIPELINE COMPONENTS</div>
+            <div class="info-row"><span class="info-key">Primary Model</span><span class="info-val">Ateeqq/ai-vs-human</span></div>
+            <div class="info-row"><span class="info-key">CLIP Model</span><span class="info-val">openai/clip-vit-b32</span></div>
+            <div class="info-row"><span class="info-key">Face Detector</span><span class="info-val">MTCNN (facenet)</span></div>
+            <div class="info-row"><span class="info-key">Video Frames</span><span class="info-val">12 per video</span></div>
+            <div class="info-row"><span class="info-key">Backend</span><span class="info-val">Flask / Python</span></div>
+          </div>
+          <div class="info-card">
+            <div class="info-card-title">ENTERPRISE FEATURES</div>
+            <div class="info-row"><span class="info-key">Batch Upload</span><span class="info-val" style="color:var(--green)">✓ 100+ files</span></div>
+            <div class="info-row"><span class="info-key">Batch Heatmaps</span><span class="info-val" style="color:var(--green)">✓ Active</span></div>
+            <div class="info-row"><span class="info-key">Image Diff Tool</span><span class="info-val" style="color:var(--green)">✓ Active</span></div>
+            <div class="info-row"><span class="info-key">Model Selection</span><span class="info-val" style="color:var(--green)">✓ 4 Modes</span></div>
+            <div class="info-row"><span class="info-key">Dark/Light Mode</span><span class="info-val" style="color:var(--green)">✓ Active</span></div>
+          </div>
+          <div class="info-card">
+            <div class="info-card-title">CONTINUOUS LEARNING</div>
+            <div class="info-row"><span class="info-key">Auto Updates</span><span class="info-val" style="color:var(--green)">✓ Active</span></div>
+            <div class="info-row"><span class="info-key">User Feedback Loop</span><span class="info-val" style="color:var(--green)">✓ Active</span></div>
+            <div class="info-row"><span class="info-key">Dataset Expansion</span><span class="info-val" style="color:var(--cyan)">Monthly</span></div>
+            <div class="info-row"><span class="info-key">Model Version</span><span class="info-val">v4.2.0</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+
+    <!-- ── BOTTOM CREDIT BAR ── -->
+    <div class="bottom-credit-bar">
+      <span>Developed by <strong>Mohammad Hamza</strong></span>
+      <div class="bcb-links">
+        <a href="https://github.com/MHamza-9111" target="_blank" rel="noopener" class="bcb-link">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+          MHamza-9111
+        </a>
+        <span class="bcb-dot">·</span>
+        <a href="https://www.linkedin.com/in/mhamza9111/" target="_blank" rel="noopener" class="bcb-link bcb-link-li">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          mhamza9111
+        </a>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<script src="/static/app.js"></script>
+</body>
+</html>

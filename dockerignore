@@ -1,0 +1,14 @@
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+uploads/
+.git
+.gitignore
+*.md
+*.txt.bak
+.env
+.DS_Store
+Thumbs.db
+*.log

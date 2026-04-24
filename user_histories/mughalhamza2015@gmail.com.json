@@ -1,0 +1,24 @@
+[
+  {
+    "name": "000180.jpg",
+    "label": "FAKE",
+    "conf": "97.3",
+    "fakep": "97.3",
+    "type": "image",
+    "faces": 1,
+    "model": "vit+clip+mtcnn",
+    "ts": "22:04:30",
+    "saved_at": "2026-04-24 22:04:30"
+  },
+  {
+    "name": "fc80bf5a-bcee-4852-957f-9642edbb2ce1.webm",
+    "label": "FAKE",
+    "conf": "63.1",
+    "fakep": "59.0",
+    "type": "video",
+    "faces": 0,
+    "model": "vit+clip+mtcnn",
+    "ts": "22:02:45",
+    "saved_at": "2026-04-24 22:02:45"
+  }
+]
